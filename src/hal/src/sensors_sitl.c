@@ -212,6 +212,8 @@ static void sensorsTask(void *param)
         estimatorEnqueue(&measurement);
         xQueueOverwrite(accelerometerDataQueue, &sensors.acc);
         xQueueOverwrite(gyroDataQueue, &sensors.gyro);
+        // Like the IMU data-ready interrupt on hardware: one stabilizer step per IMU sample.
+        xSemaphoreGive(dataReady);
         break;
       case SENSOR_MAG_SIM:
         processMagnetometerMeasurements(&(p.data[1]));
@@ -276,7 +278,6 @@ static void sensorsTask(void *param)
       lastGyroBiasFound =  gyroBiasFound;
       crtpSendPacket(&p);
     }
-    xSemaphoreGive(dataReady);
   }
 }
 
