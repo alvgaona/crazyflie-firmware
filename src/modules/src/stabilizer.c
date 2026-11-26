@@ -389,6 +389,10 @@ static void stabilizerTask(void* param)
       } else {
         #ifndef CONFIG_PLATFORM_SITL
         motorsStop();
+        #else
+        // the simulator keeps the last motor command it received, so tell it explicitly
+        const motors_thrust_pwm_t motorsOff = {0};
+        motorsSetRatio(&motorsOff);
         #endif
       }
 
