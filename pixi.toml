@@ -30,6 +30,8 @@ sed = ">=4.9,<5"
 cmake = "*"
 pkg-config = "*"
 jinja2 = "*"
+mujoco = ">=3.17.0,<4"
+numpy = ">=2.5.5,<3"
 
 [pypi-dependencies]
 cfclient = ">=2025.12.1"

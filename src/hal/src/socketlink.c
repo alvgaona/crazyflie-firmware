@@ -174,7 +174,8 @@ void socketlinkInit()
   memset((char *)&remaddr, 0, sizeof(remaddr));\
   remaddr.sin_family = AF_INET;
   if (strcmp(address_host, "INADDR_ANY") == 0){
-    remaddr.sin_addr.s_addr =  htonl(INADDR_ANY);
+    // Linux routes sends to 0.0.0.0 to loopback; macOS rejects them (EHOSTUNREACH).
+    remaddr.sin_addr.s_addr =  htonl(INADDR_LOOPBACK);
   } else if (inet_addr(address_host) == INADDR_NONE){
     isInit = false;
     return;
