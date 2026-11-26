@@ -28,6 +28,7 @@
 
 
 /* Personal configs */
+#include <unistd.h>
 #include "FreeRTOSConfig.h"
 
 /* FreeRtos includes */
@@ -93,6 +94,15 @@ int main(int argc, char **argv)
   while(1);
 
   return 0;
+}
+
+/*
+* SITL idle hook: sleep until the next tick signal, like `wfi` on the STM32. Without it the idle
+* task busy-spins and every cf2 process burns most of a CPU core.
+*/
+void vApplicationIdleHook(void)
+{
+  usleep(1000000 / configTICK_RATE_HZ);  // returns early when the tick signal arrives
 }
 
 /*

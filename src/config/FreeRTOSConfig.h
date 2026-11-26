@@ -71,11 +71,7 @@
  *----------------------------------------------------------*/
 
 #define configUSE_PREEMPTION		1
-#ifndef CONFIG_PLATFORM_SITL
-#define configUSE_IDLE_HOOK			1
-#else
-#define configUSE_IDLE_HOOK     0
-#endif   
+#define configUSE_IDLE_HOOK			1  // SITL: sleeping hook in main_sitl.c (the STM32 one is in system.c)
 #define configUSE_TICK_HOOK			0
 #define configCPU_CLOCK_HZ			( ( unsigned long ) FREERTOS_MCU_CLOCK_HZ )
 #define configTICK_RATE_HZ_RAW  1000
