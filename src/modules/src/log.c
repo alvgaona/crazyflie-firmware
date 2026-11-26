@@ -497,6 +497,7 @@ static int logDeleteBlock(int id)
   }
 
   logBlocks[i].id = BLOCK_ID_FREE;
+  logBlocks[i].ops = NULL;  // freed above; a run that was already scheduled must not walk it
   return 0;
 }
 
@@ -564,11 +565,20 @@ static bool appendToPacket(CRTPPacket * pk, const void * data, size_t n) {
 void logRunBlock(void * arg)
 {
   struct log_block *blk = arg;
-  struct log_ops *ops = blk->ops;
+  struct log_ops *ops;
   static CRTPPacket pk;
   unsigned int timestamp;
 
   xSemaphoreTake(logLock, portMAX_DELAY);
+
+  // The block may have been deleted (e.g. a client reconnecting resets the logs) after this run was
+  // scheduled: read its ops only under the lock, or this walks freed memory.
+  ops = blk->ops;
+  if (blk->id == BLOCK_ID_FREE || ops == NULL)
+  {
+    xSemaphoreGive(logLock);
+    return;
+  }
 
   timestamp = ((long long)xTaskGetTickCount())/portTICK_RATE_MS;
 
