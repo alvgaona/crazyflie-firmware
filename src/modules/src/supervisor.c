@@ -34,7 +34,9 @@
 
 #include "log.h"
 #include "param.h"
+#ifndef CONFIG_PLATFORM_SITL
 #include "motors.h"
+#endif
 #include "power_distribution.h"
 #include "supervisor.h"
 #include "supervisor_state_machine.h"
@@ -272,12 +274,13 @@ bool supervisorRequestArming(const bool doArm) {
   return true;
 }
 
-//
+//`
 // We say we are flying if one or more motors are running over the idle thrust.
 //
 static bool isFlyingCheck(SupervisorMem_t* this, const uint32_t tick) {
   bool isThrustOverIdle = false;
   const uint32_t idleThrust = powerDistributionGetIdleThrust();
+  #ifndef CONFIG_PLATFORM_SITL
   for (int i = 0; i < NBR_OF_MOTORS; ++i) {
     const uint32_t ratio = powerDistributionMotorType(i) * motorsGetRatio(i);
     if (ratio > idleThrust) {
@@ -285,7 +288,15 @@ static bool isFlyingCheck(SupervisorMem_t* this, const uint32_t tick) {
       break;
     }
   }
-
+  #else
+  for (int i = 0; i < NBR_OF_MOTORS; ++i) {
+    uint16_t ratio = getMotorRatio(i);
+    if (ratio > idleThrust) {
+      isThrustOverIdle = true;
+      break;
+    }
+  }
+  #endif
   if (isThrustOverIdle) {
     this->latestThrustTick = tick;
   }
@@ -653,7 +664,7 @@ bool supervisorAreMotorsAllowedToRun() {
 void infoDump(const SupervisorMem_t* this) {
   DEBUG_PRINT("Supervisor info ---\n");
   DEBUG_PRINT("State: %s\n", supervisorGetStateName(this->state));
-  DEBUG_PRINT("Conditions: (0x%lx)\n", this->latestConditions);
+  DEBUG_PRINT("Conditions: (0x%x)\n", this->latestConditions);
   for (supervisorConditions_t condition = 0; condition < supervisorCondition_NrOfConditions; condition++) {
     const supervisorConditionBits_t bit = 1 << condition;
     int bitValue = 0;
@@ -661,7 +672,7 @@ void infoDump(const SupervisorMem_t* this) {
       bitValue = 1;
     }
 
-    DEBUG_PRINT("  %s (0x%lx): %u\n", supervisorGetConditionName(condition), bit, bitValue);
+    DEBUG_PRINT("  %s (0x%x): %u\n", supervisorGetConditionName(condition), bit, bitValue);
   }
 }
 

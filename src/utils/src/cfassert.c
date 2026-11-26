@@ -29,8 +29,10 @@
 #include <stdint.h>
 #include "FreeRTOS.h"
 #include "cfassert.h"
+#ifndef CONFIG_PLATFORM_SITL
 #include "led.h"
 #include "motors.h"
+#endif
 #include "debug.h"
 
 #define MAGIC_ASSERT_INDICATOR 0x2f8a001f
@@ -69,7 +71,13 @@ typedef struct SNAPSHOT_DATA {
 
 // The .nzds section is not cleared at startup, data here will survive a
 // reset (by the watch dog for instance)
-SNAPSHOT_DATA snapshot __attribute__((section(".nzds"))) = {
+SNAPSHOT_DATA snapshot
+#ifdef __APPLE__
+__attribute__((section("__DATA,__nzds")))
+#else
+__attribute__((section(".nzds")))
+#endif
+ = {
   .magicNumber = 0,
   .type = SnapshotTypeNone,
 };
@@ -80,9 +88,12 @@ static enum snapshotType_e currentType = SnapshotTypeNone;
 void assertFail(char *exp, char *file, int line)
 {
   portDISABLE_INTERRUPTS();
+  #ifndef CONFIG_PLATFORM_SITL
   storeAssertFileData(file, line);
+  #endif
   DEBUG_PRINT("Assert failed %s:%d\n", file, line);
 
+  #ifndef CONFIG_PLATFORM_SITL
   motorsStop();
   ledShowFaultPattern();
 
@@ -91,6 +102,7 @@ void assertFail(char *exp, char *file, int line)
     // Only reset if debugger is not connected
     NVIC_SystemReset();
   }
+  #endif
 }
 
 void storeAssertFileData(const char *file, int line)

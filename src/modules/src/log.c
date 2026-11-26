@@ -146,8 +146,13 @@ void logRunBlock(void * arg);
 void logBlockTimed(xTimerHandle timer);
 
 //These are set by the Linker
+#ifdef __APPLE__
+extern struct log_s _log_start __asm("section$start$__DATA$__log");
+extern struct log_s _log_stop __asm("section$end$__DATA$__log");
+#else
 extern struct log_s _log_start;
 extern struct log_s _log_stop;
+#endif
 
 //Pointer to the logeters list and length of it
 static struct log_s * logs;
@@ -720,7 +725,7 @@ void logRunBlock(void * arg)
       if (blk->droppedPackets++ % 100 == 0)
       {
         DEBUG_PRINT("WARNING: LOG packets drop detected (%lu packets lost)\n",
-                    blk->droppedPackets);
+                     (unsigned long)blk->droppedPackets);
       }
     }
   }

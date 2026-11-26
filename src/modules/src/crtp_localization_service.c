@@ -39,13 +39,17 @@
 #include "stabilizer.h"
 #include "configblock.h"
 #include "worker.h"
+#ifndef CONFIG_PLATFORM_SITL
 #include "autoconf.h"
+#endif
 
 #ifdef CONFIG_DECK_LIGHTHOUSE
 #include "lighthouse_storage.h"
 #endif
 
+#ifdef CONFIG_DECK_LOCO
 #include "locodeck.h"
+#endif
 
 #include "estimator.h"
 #include "quatcompress.h"
@@ -147,8 +151,13 @@ static uint8_t lhMatchedStreamMaxTimeMs = 25;
 static uint8_t lhMatchedStreamMinBsCount = 2;
 static paramVarId_t enLhMtchStmParamId;
 
+#ifdef CONFIG_PLATFORM_SITL
 static float extPosStdDev = 0.01;
-static float extQuatStdDev = 4.5e-3;
+static float extQuatStdDev = 0.5e-1;
+#else
+static float extPosStdDev = 0.01;
+static float extQuatStdDev = 0.06;
+#endif
 static bool isInit = false;
 static uint8_t my_id;
 static uint16_t tickOfLastPacket; // tick when last packet was received

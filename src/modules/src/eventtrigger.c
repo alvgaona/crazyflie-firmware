@@ -32,8 +32,13 @@
 static eventtriggerCallback callbacks[eventtriggerHandler_Count] = {0};
 
 /* Symbols set by the linker script */
+#ifdef __APPLE__
+extern eventtrigger _eventtrigger_start __asm("section$start$__DATA$__evtrig");
+extern eventtrigger _eventtrigger_stop __asm("section$end$__DATA$__evtrig");
+#else
 extern eventtrigger _eventtrigger_start;
 extern eventtrigger _eventtrigger_stop;
+#endif
 
 uint16_t eventtriggerGetId(const eventtrigger *event)
 {

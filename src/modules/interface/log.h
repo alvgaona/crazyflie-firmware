@@ -120,6 +120,12 @@ struct log_s {
   uint8_t type;
   char * name;
   void * address;
+    /*TODO: Need a better solution for this */
+  #if defined(ARCH_32) && defined(CONFIG_PLATFORM_SITL)
+    uint8_t useless[3];
+  #elif defined(ARCH_64) && defined(CONFIG_PLATFORM_SITL)
+    uint8_t useless[7];
+  #endif
 };
 
 /* Possible variable types */
@@ -178,8 +184,14 @@ typedef struct {
    { \
   .type = TYPE, .name = #NAME, .address = (void*)(ADDRESS), },
 
+#ifdef __APPLE__
+#define LOG_SECTION(NAME) __attribute__((section("__DATA,__log"), used))
+#else
+#define LOG_SECTION(NAME) __attribute__((section(".log." #NAME), used))
+#endif
+
 #define LOG_GROUP_START(NAME)  \
-  static const struct log_s __logs_##NAME[] __attribute__((section(".log." #NAME), used)) = { \
+  static const struct log_s __logs_##NAME[] LOG_SECTION(NAME) = { \
   LOG_ADD_GROUP(LOG_GROUP | LOG_START, NAME, 0x0)
 
 //#define LOG_GROUP_START_SYNC(NAME, LOCK) LOG_ADD_GROUP(LOG_GROUP | LOG_START, NAME, LOCK);

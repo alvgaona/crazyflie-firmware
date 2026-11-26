@@ -39,6 +39,12 @@ struct param_s {
   void * address;
   void (*callback)(void);
   void * (*getter)(void);
+  /*TODO: Need a better solution for this */
+  #if defined(ARCH_32) && defined(CONFIG_PLATFORM_SITL)
+    uint8_t useless[3];
+  #elif defined(ARCH_64) && defined(CONFIG_PLATFORM_SITL)
+    uint8_t useless[24];
+  #endif
 };
 
 typedef uint8_t * (*paramGetterUInt8)(void);
@@ -143,8 +149,14 @@ typedef float * (*paramGetterFloat)(void);
 
 #ifndef UNIT_TEST_MODE
 
+#ifdef __APPLE__
+#define PARAM_SECTION(NAME) __attribute__((section("__DATA,__param"), used))
+#else
+#define PARAM_SECTION(NAME) __attribute__((section(".param." #NAME), used))
+#endif
+
 #define PARAM_GROUP_START(NAME)  \
-  static struct param_s __params_##NAME[] __attribute__((section(".param." #NAME), used)) = { \
+  static struct param_s __params_##NAME[] PARAM_SECTION(NAME) = { \
   PARAM_ADD_GROUP(PARAM_GROUP | PARAM_START, NAME, 0x0)
 
 #else // UNIT_TEST_MODE

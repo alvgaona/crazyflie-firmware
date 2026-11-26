@@ -7,6 +7,7 @@ bin/*
 .pydevproject
 .settings/*
 .vscode/*
+cache/*
 *~
 cflie.*
 version.c
@@ -41,6 +42,7 @@ docs/api
 build/
 .cache/
 /compile_commands.json
+sitl_make/build/*
 # To avoid that /tools/build is ignored
 !/tools/*
 
@@ -54,3 +56,5 @@ tools/dependency/web/data.js
 # Clangd
 compile_commands.json
 .cache/**
+# pixi environments
+.pixi/

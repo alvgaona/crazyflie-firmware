@@ -29,11 +29,13 @@
 #include "config.h"
 #include "FreeRTOS.h"
 #include "param_logic.h"
-#include "storage.h"
 #include "crc32.h"
 #include "debug.h"
 #include "cfassert.h"
+#ifndef CONFIG_PLATFORM_SITL
 #include "autoconf.h"
+#include "storage.h"
+#endif
 
 #if 0
 #define PARAM_DEBUG(fmt, ...) DEBUG_PRINT("D/param " fmt, ## __VA_ARGS__)
@@ -70,8 +72,13 @@ static char paramWriteByNameProcess(char* group, char* name, int type, void *val
 
 #ifndef UNIT_TEST_MODE
 //These are set by the Linker
+#ifdef __APPLE__
+extern struct param_s _param_start __asm("section$start$__DATA$__param");
+extern struct param_s _param_stop __asm("section$end$__DATA$__param");
+#else
 extern struct param_s _param_start;
 extern struct param_s _param_stop;
+#endif
 #else
 //When placed in ram for testing
 extern struct param_s *_param_start;
@@ -85,6 +92,7 @@ static int paramsLen;
 static uint32_t paramsCrc;
 static uint16_t paramsCount = 0;
 
+#ifndef __APPLE__
 // _sdata is from linker script and points to start of data section
 extern int _sdata;
 extern int _edata;
@@ -93,6 +101,7 @@ extern int _sidata;
 // _stext is from linker script and points to start of flash section
 extern int _stext;
 extern int _etext;
+#endif
 static const uint64_t dummyZero64 = 0;
 
 static void * paramGetDefault(int index)
@@ -103,6 +112,12 @@ static void * paramGetDefault(int index)
 
   address = (uint32_t)(params[index].address);
 
+#ifdef __APPLE__
+  (void)valueRelative;
+  if (0)
+  {
+  }
+#else
   // Is variable in data section?
   if (address >= (uint32_t)&_sdata &&
       address <= (uint32_t)&_edata)
@@ -116,6 +131,7 @@ static void * paramGetDefault(int index)
   {
     ptrDefaultValue = (void *)(address);
   }
+#endif
   // It is zero
   else
   {

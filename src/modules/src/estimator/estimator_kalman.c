@@ -241,6 +241,7 @@ static void kalmanTask(void* parameters) {
   #endif
 
     // Run the system dynamics to predict the state forward.
+    // if (accSubSampler.count > 0 && gyroSubSampler.count > 0) {
     if (nowMs >= nextPredictionMs) {
       axis3fSubSamplerFinalize(&accSubSampler);
       axis3fSubSamplerFinalize(&gyroSubSampler);
@@ -251,7 +252,7 @@ static void kalmanTask(void* parameters) {
       STATS_CNT_RATE_EVENT(&predictionCounter);
 
       if (!rateSupervisorValidate(&rateSupervisorContext, nowMs)) {
-        DEBUG_PRINT("WARNING: Kalman prediction rate off (%lu)\n", rateSupervisorLatestCount(&rateSupervisorContext));
+        DEBUG_PRINT("WARNING: Kalman prediction rate off (%lu)\n", (unsigned long)rateSupervisorLatestCount(&rateSupervisorContext));
       }
     }
 
@@ -310,8 +311,12 @@ static void updateQueuedMeasurements(const uint32_t nowMs, const bool quadIsFlyi
     switch (m.type) {
       case MeasurementTypeTDOA:
         if(robustTdoa){
+          #ifndef CONFIG_PLATFORM_SITL
           // robust KF update with TDOA measurements
           kalmanCoreRobustUpdateWithTdoa(&coreData, &m.data.tdoa, &outlierFilterTdoaState);
+          #else
+          DEBUG_PRINT("Robust TDOA not supported in SITL\n");
+          #endif
         }else{
           // standard KF update
           kalmanCoreUpdateWithTdoa(&coreData, &m.data.tdoa, nowMs, &outlierFilterTdoaState);
@@ -325,8 +330,12 @@ static void updateQueuedMeasurements(const uint32_t nowMs, const bool quadIsFlyi
         break;
       case MeasurementTypeDistance:
         if(robustTwr){
+            #ifndef CONFIG_PLATFORM_SITL
             // robust KF update with UWB TWR measurements
             kalmanCoreRobustUpdateWithDistance(&coreData, &m.data.distance);
+            #else
+            DEBUG_PRINT("Robust TWR not supported in SITL\n");
+            #endif
         }else{
             // standard KF update
             kalmanCoreUpdateWithDistance(&coreData, &m.data.distance);

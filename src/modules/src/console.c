@@ -77,6 +77,7 @@ static StaticSemaphore_t sourceLockBuffer;
 
 #ifdef STM32F40_41xxx
 #include "stm32f4xx.h"
+#elif CONFIG_PLATFORM_SITL
 #else
 #include "stm32f10x.h"
 #ifndef SCB_ICSR_VECTACTIVE_Msk
@@ -444,8 +445,11 @@ bool consoleTest(void)
 
 int consolePutchar(int ch)
 {
+  #ifndef CONFIG_PLATFORM_SITL
   bool isInInterrupt = (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
-
+  #else
+  bool isInInterrupt = false;
+  #endif
   if (!isInit) {
     return 0;
   }

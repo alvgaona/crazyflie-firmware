@@ -11,6 +11,8 @@ platforms = ["linux-64", "osx-64", "osx-arm64"]
 version = "0.1.0"
 
 [tasks]
+sitl-configure = "cmake -S sitl_make -B sitl_make/build"
+sitl-build = { cmd = "cmake --build sitl_make/build -j", depends-on = ["sitl-configure"] }
 
 [dependencies]
 python = ">=3.13,<3.14"
@@ -24,5 +26,17 @@ ncurses = ">=6.5,<7"
 coreutils = ">=9.5,<10"
 sed = ">=4.9,<5"
 
+# SITL (sitl_make/)
+cmake = "*"
+pkg-config = "*"
+jinja2 = "*"
+
 [pypi-dependencies]
 cfclient = ">=2025.12.1"
+
+# conda's ld64 can't link against the macOS 26 SDK (libSystem.tbd lists arm64e only), so SITL uses Apple's clang on macOS.
+[target.osx-arm64.tasks]
+sitl-configure = "cmake -S sitl_make -B sitl_make/build -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++"
+
+[target.osx-64.tasks]
+sitl-configure = "cmake -S sitl_make -B sitl_make/build -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++"
