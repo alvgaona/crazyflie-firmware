@@ -58,6 +58,8 @@ char* address_host;
 
 int main(int argc, char **argv) 
 {
+  // Line-buffer stdout so console output reaches log files promptly (no stdbuf needed).
+  setvbuf(stdout, NULL, _IOLBF, 0);
 
   if (argc == 3){
     crtp_port = atoi(argv[1]);

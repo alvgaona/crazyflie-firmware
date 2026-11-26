@@ -49,7 +49,7 @@ typedef enum {
   CRTP_PORT_SETPOINT_GENERIC = 0x07,
   CRTP_PORT_SETPOINT_HL      = 0x08,
   CRTP_PORT_SUPERVISOR       = 0x09,
-  CRTP_PORT_SETPOINT_SIM     = 0x09,
+  CRTP_PORT_SETPOINT_SIM     = 0x0B,  // SITL simulator link; must match CRTP_PORT_SIM in crazyflie-simulation
   CRTP_PORT_PLATFORM         = 0x0D,
   CRTP_PORT_LINK             = 0x0F,
 } CRTPPort;

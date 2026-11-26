@@ -217,7 +217,7 @@ set(SRCS
   ${CF2_SITL_SRCS_DIR}/modules/src/controller/position_controller_indi.c
   ${CF2_SITL_SRCS_DIR}/modules/src/controller/controller_brescianini.c
   ${CF2_SITL_SRCS_DIR}/modules/src/controller/controller_lee.c
-  ${CF2_SITL_SRCS_DIR}/modules/src/crtp_supervisor_sitl.c
+  ${CF2_SITL_SRCS_DIR}/modules/src/crtp_supervisor.c
   ${CF2_SITL_SRCS_DIR}/modules/src/power_distribution_sitl.c
 
   #High level commander
@@ -276,6 +276,4 @@ if(NOT APPLE)
 set_target_properties(
   cf2 PROPERTIES LINK_FLAGS "-Wl,--gc-sections${NO_WARN_RWX_FLAG},-T${CMAKE_CURRENT_SOURCE_DIR}/log_param_linker.ld"
 )
-
-include(cmake/sitl_gazebo.cmake)
 endif()
